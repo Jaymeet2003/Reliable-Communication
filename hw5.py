@@ -13,6 +13,20 @@ import homework5.logging
 
 
 def send(sock: socket.socket, data: bytes):
+    """
+    Implementation of the sending logic for sending data over a slow,
+    lossy, constrained network.
+
+    Args:
+        sock -- A socket object, constructed and initialized to communicate
+                over a simulated lossy network.
+        data -- A bytes object, containing the data to send over the network.
+    """
+
+    # Naive implementation where we chunk the data to be sent into
+    # packets as large as the network will allow, and then send them
+    # over the network, pausing half a second between sends to let the
+    # network "rest" :)
     logger = homework5.logging.get_logger("hw5-sender")
     chunk_size = homework5.MAX_PACKET - 4
     seq_number = 0
@@ -57,7 +71,7 @@ def send(sock: socket.socket, data: bytes):
 
     while True:
         try:
-            # sock.settimeout(2 * timeout)  # Double the timeout for FIN packet
+            sock.settimeout(2 * timeout)  # Double the timeout for FIN packet
             logger.info("Fin")
             ack, _ = sock.recvfrom(1024)
             if ack == fin_packet:
@@ -69,6 +83,17 @@ def send(sock: socket.socket, data: bytes):
 
 
 def recv(sock: socket.socket, dest: io.BufferedIOBase) -> int:
+    """
+    Implementation of the receiving logic for receiving data over a slow,
+    lossy, constrained network.
+
+    Args:
+        sock -- A socket object, constructed and initialized to communicate
+                over a simulated lossy network.
+
+    Return:
+        The number of bytes written to the destination.
+    """
     logger = homework5.logging.get_logger("hw5-receiver")
     expected_seq = 0
     received_data = {}
